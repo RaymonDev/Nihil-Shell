@@ -1,4 +1,9 @@
-# default.nix by poligle (thinkpad)
+# default.nix by poligle (cyborg)
+#
+# Fork for an MSI Cyborg 15 A13VF: Intel i7-13620H, Intel UHD + RTX 4060 Laptop,
+# one 1920x1080 144 Hz panel, no fingerprint reader, Windows 11 on the same disk.
+# hardware-configuration.nix is not in the repository: it is generated on the
+# machine (see INSTALL.md) and has to be tracked by git before building.
 
 { config, lib, pkgs, ... }:
 {
@@ -10,6 +15,7 @@
         ../../modules/locale.nix
         ../../modules/audio.nix
         ../../modules/hardware.nix
+        ../../modules/nvidia.nix
         ../../modules/users.nix
         ../../modules/packages.nix
         ../../modules/hyprland.nix
@@ -28,19 +34,20 @@
     programs.zsh.enable = true;
     
     # Host-specific
-    networking.hostName = "thinkpad";
+    networking.hostName = "cyborg";
 
     # NIHIL: outputs at their logical size (after rotation), so the
-    # dot-matrix wallpapers land on exact pixels. DP-1 is the vertical panel.
+    # dot-matrix wallpapers land on exact pixels. Hyprland runs the panel at
+    # scale 1. To use an external monitor, add it here under its connector name
+    # (see `hyprctl monitors`) with its real size.
     nihil =
     {
         primaryOutput = "eDP-1";
         wallpaper = "night";
+        language = "en";
         outputs =
         {
-            "eDP-1"    = { width = 1920; height = 1200; };
-            "HDMI-A-1" = { width = 2560; height = 1440; };
-            "DP-1"     = { width = 1080; height = 1920; bar = false; };
+            "eDP-1" = { width = 1920; height = 1080; };
         };
     };
     system.stateVersion = "26.05";

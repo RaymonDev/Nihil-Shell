@@ -19,15 +19,14 @@
         ./home/zen.nix
         ./home/vscode.nix
 		./home/bluetooth.nix
-		./home/engineering.nix
 		./home/cli.nix
 		./home/refresh.nix
 		./home/shell.nix
 		./home/fastfetch.nix
 	];
 
-	home.username = "poligle";
-	home.homeDirectory = "/home/poligle";
+	home.username = "ramon";
+	home.homeDirectory = "/home/ramon";
 	home.stateVersion = "26.05";
 	programs.home-manager.enable = true;
 
@@ -44,6 +43,5 @@
 		pkgs.spotify
 		pkgs.libreoffice
         pkgs.kicad
-        (pkgs.octaveFull.withPackages (ps: with ps; [ signal ]))
     ];
 }

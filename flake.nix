@@ -1,7 +1,7 @@
 # flake.nix by poligle
 
 {
-	description = "NixOS Config for poligle@thinkpad";
+	description = "NixOS Config for ramon@cyborg (MSI Cyborg 15 A13VF)";
 
 	inputs = 
 	{
@@ -28,11 +28,11 @@
 	};
 	outputs = inputs@{ self, nixpkgs, home-manager, stylix, zen-browser , ... }:
 	{
-		nixosConfigurations.thinkpad = nixpkgs.lib.nixosSystem 
+		nixosConfigurations.cyborg = nixpkgs.lib.nixosSystem 
 		{
 			system = "x86_64-linux";
 			modules = [
-				./hosts/thinkpad/default.nix
+				./hosts/cyborg/default.nix
                 stylix.nixosModules.stylix
 
 				home-manager.nixosModules.home-manager
@@ -42,7 +42,7 @@
 					home-manager.backupFileExtension = "hm-backup";
 
                     home-manager.extraSpecialArgs = { inherit inputs; };
-					home-manager.users.poligle = ./home.nix;
+					home-manager.users.ramon = ./home.nix;
 				}
 			];
 		};

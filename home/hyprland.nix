@@ -8,7 +8,6 @@ let
 	rgb = hex: "rgb(${hex})";
 
 	internalPanel = "eDP-1";
-	verticalPanel = "DP-1";
 	playSound = file: "${pkgs.pipewire}/bin/pw-play --volume 0.4 ${file}";
 
 	bind = key: action: { _args = [ key (lua action) ]; };
@@ -127,14 +126,7 @@ in
 
 			monitor =
 			[
-				{ output = "HDMI-A-1"; mode = "preferred"; position = "0x0"; scale = 1; transform = 0; }
-				{ output = verticalPanel; mode = "1920x1080@165"; position = "2560x-240"; scale = 1; transform = 3; }
-				{ output = internalPanel; mode = "preferred"; position = "auto"; scale = 1; transform = 0; disabled = false; }
-			];
-
-			workspace_rule =
-			[
-				{ workspace = "m[${verticalPanel}]"; layout_opts.orientation = "top"; }
+				{ output = internalPanel; mode = "1920x1080@144"; position = "auto"; scale = 1; transform = 0; disabled = false; }
 			];
 
 			config =
@@ -190,18 +182,12 @@ in
 				{
 					kb_layout = "es";
 					kb_variant = "";
-					kb_model = "thinkpad";
+					kb_model = "pc105";
 					follow_mouse = 1;
 					sensitivity = 0;
 					touchpad.natural_scroll = false;
 				};
 			};
-
-			device =
-			[
-				{ name = "tpps/2-synaptics-trackpoint"; sensitivity = -0.4; scroll_method = "no_scroll"; }
-				{ name = "logitech-pro-x-1"; sensitivity = -0.2; }
-			];
 
 			# NIHIL motion: decisive deceleration, never a bounce.
 			curve =

@@ -2,10 +2,10 @@
 
 { config, lib, pkgs, ... }:
 {
-    users.users.poligle = 
+    users.users.ramon = 
     {
         isNormalUser = true;
-        description = "Pol";
+        description = "Ramon";
         shell = pkgs.zsh;
         extraGroups = [ "wheel" "networkmanager" "video" "input" "docker" "wireshark" ];
         packages = with pkgs; 

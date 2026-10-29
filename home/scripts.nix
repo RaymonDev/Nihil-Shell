@@ -16,6 +16,7 @@ let
 	mic-led-sync = pkgs.writeShellScriptBin "mic-led-sync" ''
 		set -euo pipefail
 		LED="/sys/class/leds/platform::micmute/brightness"
+		[ -w "$LED" ] || exit 0
 		out="$(${wpctl} get-volume @DEFAULT_AUDIO_SOURCE@ 2>&1 || true)"
 		echo 0 > "$LED"
 		if [[ "$out" == *"Could not connect to PipeWire"* ]]; then

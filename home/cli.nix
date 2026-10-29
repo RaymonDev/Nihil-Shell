@@ -5,7 +5,17 @@
     programs.gh =
     {
         enable = true;
-        settings.git_protocol = "ssh";
+        settings.git_protocol = "https";
+    };
+
+    programs.git =
+    {
+        enable = true;
+        settings.user =
+        {
+            name = "Raymon";
+            email = "40960636+RaymonDev@users.noreply.github.com";
+        };
     };
 
     programs.lazygit.enable = true;

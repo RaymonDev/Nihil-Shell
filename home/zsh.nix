@@ -42,8 +42,8 @@ in
             la = "ls -A";
 
             # NixOS
-            nrebuild = "sudo nixos-rebuild switch --flake ~/nixos-config#thinkpad";
-            nupdate = "cd ~/nixos-config && nix flake update && sudo nixos-rebuild switch --flake ~/nixos-config#thinkpad";
+            nrebuild = "sudo nixos-rebuild switch --flake ~/nixos-config#cyborg";
+            nupdate = "cd ~/nixos-config && nix flake update && sudo nixos-rebuild switch --flake ~/nixos-config#cyborg";
             ncheck = "cd ~/nixos-config && nix flake check";
             ngc = "sudo nix-collect-garbage --delete-older-than 7d";
             

@@ -17,6 +17,9 @@
 
 ![NIHIL desktop](docs/assets/screens/desktop.png)
 
+> **Fork notice:** this fork tunes NIHIL for an MSI Cyborg 15 A13VF (host `cyborg`, user `ramon`).
+> To install it next to Windows 11, follow [INSTALL.md](INSTALL.md).
+
 NIHIL is my NixOS configuration for `poligle@thinkpad`. It takes the structure of
 [Caelestia](https://github.com/caelestia-dots/shell) — a frame around the screen with
 drawers that grow out of it — and dresses it in the language of Nothing: monochrome,

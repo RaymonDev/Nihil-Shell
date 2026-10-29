@@ -104,7 +104,7 @@ in
 
 			auth =
 			{
-				"fingerprint:enabled" = true;
+				"fingerprint:enabled" = false;
 				"fingerprint:ready_message" = s.fingerprintReady;
 				"fingerprint:present_message" = s.fingerprintPresent;
 			};
