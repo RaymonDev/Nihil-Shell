@@ -54,7 +54,7 @@
         # to drop it (and Ollama) altogether.
         nilo =
         {
-            enable = true;
+            enable = false;
             acceleration = "vulkan";
             integratedGpu = true;
         };
