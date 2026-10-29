@@ -49,6 +49,15 @@
         {
             "eDP-1" = { width = 1920; height = 1080; };
         };
+
+        # Nilo on the Radeon of the Ryzen, through Vulkan. Set enable = false
+        # to drop it (and Ollama) altogether.
+        nilo =
+        {
+            enable = true;
+            acceleration = "vulkan";
+            integratedGpu = true;
+        };
     };
     system.stateVersion = "26.05";
 

@@ -39,7 +39,8 @@ Scope {
         // OnDemand, not Exclusive: Hyprland drops every focus grab when a layer
         // turns exclusive (desktop/view/LayerSurface.cpp), which closed the
         // launcher and the panel the moment they opened. The grab below hands
-        // the keyboard to this window instead.
+        // the keyboard to this window instead. The launcher takes it however
+        // it opened, so you can type as soon as it appears from the edge.
         WlrLayershell.keyboardFocus: launcherOpen || (panelOpen && !Drawers.byHover) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
         readonly property bool dashOpen: Drawers.isOpen("dashboard", root.output)
@@ -69,7 +70,9 @@ Scope {
         readonly property real panelL: Math.min(height - 2 * root.edge - 96, 860)
         readonly property real panelD: 400
         readonly property real launcherW: Math.min(860, innerW - 120)
-        readonly property real launcherD: 470
+        // Taller for Nilo ("?"), so the conversation has room.
+        property real launcherD: launcher.niloMode ? Math.min(680, height - 2 * root.edge - 140) : 470
+        Behavior on launcherD { NumberAnimation { duration: Tokens.animDrawer; easing.type: Easing.OutCubic } }
         readonly property real osdL: 300
         readonly property real osdD: 64
 
@@ -85,6 +88,7 @@ Scope {
                 Region { item: barHit },
                 Region { item: hotZone },
                 Region { item: cornerZone },
+                Region { item: bottomZone },
                 Region { item: dashHit },
                 Region { item: panelHit },
                 Region { item: launcherHit },
@@ -92,8 +96,10 @@ Scope {
             ]
         }
 
-        // Clicking outside an open drawer closes it. Drawers opened by
-        // hovering don't take the keyboard; they close when the pointer leaves.
+        // Clicking outside an open drawer closes it. The dashboard and the
+        // panel opened by hovering leave the keyboard where it was; all of
+        // them close when the pointer leaves, unless a click or a key (the
+        // launcher) kept them.
         HyprlandFocusGrab {
             windows: [win]
             active: win.launcherOpen || ((win.panelOpen || win.dashOpen) && !Drawers.byHover)
@@ -197,7 +203,8 @@ Scope {
                     if (!Drawers.byHover)
                         return;
                     if ((win.dashOpen && !hotZone.containsMouse && !dashHover.hovered)
-                            || (win.panelOpen && !cornerZone.containsMouse && !panelHover.hovered))
+                            || (win.panelOpen && !cornerZone.containsMouse && !panelHover.hovered)
+                            || (win.launcherOpen && !bottomZone.containsMouse && !launcherHover.hovered))
                         Drawers.close();
                 }
             }
@@ -274,7 +281,8 @@ Scope {
                 }
             }
 
-            // Launcher: from the bottom edge, SUPER+Space or three fingers up.
+            // Launcher: from the bottom edge, SUPER+Space, three fingers up or
+            // resting the pointer on the middle of the bottom edge.
             Item {
                 x: win.centerX - win.launcherW / 2
                 y: win.height - root.edge - win.launcherD * win.launcherP
@@ -282,11 +290,52 @@ Scope {
                 height: win.launcherD * win.launcherP
                 clip: true
 
+                HoverHandler {
+                    id: launcherHover
+                    onHoveredChanged: if (!hovered) hoverClose.restart()
+                }
+
                 Launcher {
+                    id: launcher
                     width: win.launcherW
                     height: win.launcherD
                     active: win.launcherOpen
                     opacity: win.reveal(win.launcherP)
+                }
+
+                // Opened by hovering, it takes the keyboard but closes when the
+                // pointer leaves; a click inside (or a key, Launcher.qml) keeps
+                // it open, as if it had come from SUPER+Space. The press goes on
+                // to the launcher.
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: win.launcherOpen && Drawers.byHover
+                    onPressed: mouse => {
+                        Drawers.byHover = false;
+                        mouse.accepted = false;
+                    }
+                }
+            }
+
+            // The zone sits on the edge itself, under the launcher's footprint.
+            // The pointer has to rest there a moment: it often lands on the
+            // bottom edge on its way to a window's status bar.
+            MouseArea {
+                id: bottomZone
+                x: win.centerX - win.launcherW / 2
+                y: win.height - height
+                width: win.launcherW
+                height: Drawers.current === "" || (win.launcherOpen && Drawers.byHover) ? root.edge + 3 : 0
+                hoverEnabled: true
+                onContainsMouseChanged: containsMouse ? bottomOpen.restart() : hoverClose.restart()
+            }
+
+            Timer {
+                id: bottomOpen
+                interval: 350
+                onTriggered: {
+                    if (bottomZone.containsMouse && Drawers.current === "")
+                        Drawers.open("launcher", root.output, true);
                 }
             }
 

@@ -52,10 +52,15 @@ no internet permission ([nihilshell.com/android](https://nihilshell.com/android/
 - **Settings.** Circular toggles, segmented sliders, Wi-Fi (with passwords and
   WPA-Enterprise hand-off), Bluetooth, audio output, notification history, session.
 - **Launcher.** Monochrome app grid that regains colour on the selection, `>` for
-  actions, `=` for a calculator.
+  actions, `=` for a calculator, `?` for Nilo.
+- **Nilo, optional.** An assistant with a local model (Qwen 3.5 on Ollama): two white eyes
+  that wake up while you type, answer, search the web if you let them and, asking you
+  first, change files and commit and push in a repository of yours. It falls asleep and
+  frees the memory after a few minutes. See [Nilo](#nilo).
 - **Light on the edge.** In the spirit of Nothing's Glyph Interface, every notification
-  sends a segment of light around the frame; critical ones run twice, in red. Plugging the
-  charger lights it from the left.
+  sends a segment of light around the frame; critical ones run twice, in red. Plugging in
+  the charger sends two lights up both sides from the bottom, which meet at the top, like
+  the launcher on the phone.
 - **Wallpapers as LED matrices.** Every image in `wallpapers/` is rendered at build time
   as dots, once per output at its native size, so each dot lands on exact pixels.
 - **Boot, login, lock.** The NixOS snowflake switching on LED by LED (Plymouth), a dotted
@@ -71,7 +76,7 @@ no internet permission ([nihilshell.com/android](https://nihilshell.com/android/
 | ![Dashboard](docs/assets/screens/dashboard.png) | ![Settings](docs/assets/screens/settings.png) |
 | Dashboard — hover the top edge or `SUPER + D` | Settings — `SUPER + P`, the status icons or the top-right corner |
 | ![Launcher](docs/assets/screens/launcher.png) | ![Notification](docs/assets/screens/notification.png) |
-| Launcher — `SUPER + Space` or three fingers up | A critical notification and its red light |
+| Launcher — `SUPER + Space`, three fingers up or the bottom edge | A critical notification and its red light |
 
 <sub>The screenshots are the shell rendered in a test harness with sample data: the
 networks, the track and the notifications are made up. App icons are Colloid's.</sub>
@@ -146,6 +151,12 @@ All of them live under `nihil.*` ([`modules/nihil.nix`](modules/nihil.nix)).
 | `wallpaper`     | `"night"`  | Default wallpaper, a file name in `wallpapers/`                 |
 | `soundPack`     | `"nihil"`  | `"nihil"` (`sounds/nihil`) or `"classic"` (the earlier sounds)  |
 | `trayHidden`    | `[ "nm-applet" "blueman" ]` | Tray items to hide, by part of their id or title. The Wi-Fi and Bluetooth applets keep running for password and pairing prompts |
+| `nilo.enable`   | `false`    | Nilo, the assistant, and Ollama to run its model ([Nilo](#nilo)) |
+| `nilo.acceleration` | `"cpu"` | `"cpu"`, `"vulkan"`, `"rocm"` or `"cuda"`: what runs the model |
+| `nilo.integratedGpu` | `false` | Let Ollama use an integrated GPU (it leaves them out by default) |
+| `nilo.models`   | Qwen 3.5, 0.8B to 35B-A3B | Models offered in Nilo's settings |
+| `nilo.contextLength` | `16384` | Context window, in tokens |
+| `nilo.searxng`  | `null`     | A SearXNG instance for web searches instead of DuckDuckGo |
 
 Read-only: `tokens` (the design tokens), `strings` (the selected language), `sounds`,
 `wallpapers` and `fonts`. To add a language, add a block to
@@ -157,7 +168,8 @@ Read-only: `tokens` (the design tokens), `strings` (the selected language), `sou
 
 | Keys                              | Action                                        |
 |-----------------------------------|-----------------------------------------------|
-| `SUPER + Space`, 3 fingers up     | Launcher (`>` actions, `=` calculator)        |
+| `SUPER + Space`, 3 fingers up     | Launcher (`>` actions, `=` calculator; also by resting the pointer on the bottom edge) |
+| `SUPER + I`, the Copilot key      | Nilo (also `?` in the launcher)               |
 | `SUPER + D`                       | Dashboard (also by hovering the top edge)     |
 | `SUPER + P`                       | Settings panel (or rest the pointer in the top-right corner) |
 | `SUPER + K`                       | Lock                                          |
@@ -189,7 +201,9 @@ service. [`home/shell.nix`](home/shell.nix) generates `Tokens.qml`, `Config.qml`
 nihil-ipc drawers toggle launcher     # launcher | dashboard | panel
 nihil-ipc osd volume 40 false
 nihil-ipc glyph test true             # light the frame (critical = red)
+nihil-ipc glyph charge                # the charger's light, rising from the bottom
 nihil-ipc notifs toggleDnd
+nihil-ipc nilo toggle                 # also: open, sleep, ask "…"
 nihil-wallpaper next                  # also: prev, set <name>, list
 journalctl --user -u nihil-shell -f   # logs
 ```
@@ -199,8 +213,100 @@ journalctl --user -u nihil-shell -f   # logs
 | `frame/`      | Frame geometry (one path with the drawers as bumps), Glyph light, bar |
 | `drawers/`    | Dashboard, settings panel, launcher, OSD, notifications         |
 | `background/` | Desktop widgets                                                 |
-| `services/`   | Audio, network (nmcli), Bluetooth, battery, MPRIS, IPC, system stats |
+| `services/`   | Audio, network (nmcli), Bluetooth, battery, MPRIS, IPC, system stats, Nilo |
 | `components/` | LEDs, dials, segmented sliders, dot-matrix image, buttons, text |
+| `nilo/`       | Nilo: the eyes, the conversation, the introduction and its settings |
+
+---
+
+## Nilo
+
+<p align="center">
+  <img src="docs/assets/screens/nilo-loop.webp" width="720" alt="Nilo in the launcher: the eyes wake up while a question is typed, the answer arrives with Nix code, then a commit and push waits for enter twice and the eyes smile.">
+</p>
+
+<sub>Rendered in the test harness: Nilo's real agent, answering a scripted model instead of
+a real one. The whole video is on [nihilshell.com](https://nihilshell.com/#nilo).</sub>
+
+An assistant in the launcher, with a model that runs on this computer. Two white eyes
+on black: asleep while the model is unloaded, awake as soon as you type, looking up
+while they think and from side to side while they search. It is meant for questions,
+not for programming the config: it answers, searches the web, looks at this computer
+and, if you allow it, changes files and commits and pushes in a repository.
+
+It is off by default. In the host:
+
+```nix
+nihil.nilo =
+{
+    enable = true;
+    acceleration = "vulkan";   # or "cpu", "rocm", "cuda"
+    integratedGpu = true;      # a laptop's Radeon or Intel GPU
+};
+```
+
+That runs [Ollama](https://ollama.com) on `127.0.0.1` (`services.ollama`) and adds the
+binds. The first time Nilo opens it introduces itself, shows how to call it, offers the
+models that suit the RAM and asks what it may do.
+
+| | |
+|---|---|
+| `SUPER + I`, the Copilot key | open or close Nilo |
+| `?` in the launcher | the same, typed: `?what's a flake` |
+| enter / esc | ask / stop the answer, or close |
+| `ctrl + n` | new conversation |
+| the eyes in the bar | the model is in memory; click to open |
+
+**What it may do**, each one a switch in its settings (the gear): **Internet** — search
+DuckDuckGo (through `ddgr`, or `nilo.searxng`) and read pages, never local addresses;
+**This computer** — NixOS version and generation, memory, disk, battery; **Files** — read,
+create and change files in one repository, never outside it or inside `.git`; **Git** —
+`git add -A`, commit and push in that repository. The repository is `~/nixos-config` by
+default; the settings list the ones under `~` (most recently used first) or take any path.
+
+Files and Git are off until you authorize them: the switch first says what it allows and
+waits for "authorize" (or the same key again). Even then, every change to a file shows its
+diff, and every commit its files and message, and waits for enter twice or a click.
+Choosing another repository turns both off again. It cannot run other commands.
+
+| ![A change to README.md shown as a diff, waiting for confirmation](docs/assets/screens/nilo-change.png) | ![The files switch asking for authorization](docs/assets/screens/nilo-access.png) |
+|:---:|:---:|
+| A change to a file, as a diff first | Files and git, off until you authorize them |
+
+**Memory.** Ollama loads the model on the first question (Nilo starts loading it while
+you type) and unloads it after the minutes chosen in the settings without questions: 5
+by default. Asleep it takes no memory; Ollama itself stays as an idle service.
+
+**History.** A conversation lives in the agent while the shell runs: closing the launcher
+keeps it, `ctrl + n` starts a new one, and nothing is written to disk. Nilo asks Ollama
+for a window of `nilo.contextLength` tokens (16 384 by default; Qwen 3.5 goes up to 262 144
+with more memory), and the oldest exchanges drop out once a conversation outgrows it.
+
+**Models.** Qwen 3.5 by default; any Ollama model with tools works, and models pulled
+with `ollama pull` show up in the list.
+
+| Model | Download | RAM, roughly | Recommended from |
+|---|---|---|---|
+| `qwen3.5:0.8b` | 1.3 GB | 2 GB | any |
+| `qwen3.5:2b` | 2.7 GB | 3.5 GB | 8 GB |
+| `qwen3.5:4b` | 3.4 GB | 5 GB | 12 GB |
+| `qwen3.5:9b` | 6.6 GB | 8.5 GB | 20 GB |
+| `qwen3.5:35b-a3b` | 22 GB | 25 GB | 56 GB |
+
+The model, the switches, the minutes and "think before answering" apply at once and live
+in `~/.local/state/nihil/nilo.json`; only the options above need a rebuild.
+
+The agent behind it is [`home/nilo/agent.py`](home/nilo/agent.py), standard-library
+Python that the shell talks to over stdin/stdout. Its tests run against a fake Ollama:
+`python3 -m unittest home/nilo/test_agent.py`.
+
+If Ollama is down ("connection refused"), Nilo starts it (polkit lets wheel users start
+`ollama.service` without a password) and otherwise shows what systemd and the journal say,
+with a button to try again; systemd also restarts it if it stops on its own. Beyond that:
+`systemctl status ollama`, `journalctl -u ollama -b`, `journalctl --user -u nihil-shell`
+(the agent logs there) and `ollama ps`. The Copilot key sends `SUPER + SHIFT + F23` on
+Linux 6.14 and later; xkb names F23 `XF86Assistant` or `XF86TouchpadOff` depending on its
+version, so the bind uses its keycode, 201 (what `wev` shows).
 
 ---
 
@@ -216,8 +322,8 @@ nixos-config/
 │   ├── plymouth.*    boot splash frames and theme
 │   └── art/          LED maps of the NixOS snowflake (19 for fastfetch, 29 for boot)
 ├── hosts/thinkpad/   hardware, hostname, NIHIL outputs
-├── modules/          system modules (nihil.nix, stylix, plymouth, regreet, …)
-├── home/             Home Manager: shell/, hyprland, hyprlock, kitty, zsh, fastfetch, …
+├── modules/          system modules (nihil.nix, nilo.nix, stylix, plymouth, regreet, …)
+├── home/             Home Manager: shell/, nilo/ (Nilo's agent), hyprland, hyprlock, …
 ├── sounds/           interface sounds (nihil/ is the NIHIL pack)
 ├── tools/            brand.py (logo, favicons, site images), sounds.py, snowflake.py
 ├── assets/brand/     logo and mark (SVG), social preview
