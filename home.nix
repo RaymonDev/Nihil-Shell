@@ -38,10 +38,7 @@
 		pkgs.awww
         pkgs.hyprshot
 		pkgs.hyprpicker
-
-		pkgs.obsidian
 		pkgs.spotify
 		pkgs.libreoffice
-        pkgs.kicad
     ];
 }

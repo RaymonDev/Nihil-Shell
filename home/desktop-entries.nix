@@ -48,11 +48,6 @@ in
         "applications/qt5ct.desktop"                            = hidden "Qt5 Settings";
         "applications/qt6ct.desktop"                            = hidden "Qt6 Settings";
     
-        # KiCad
-        "applications/org.kicad.bitmap2component.desktop"       = hidden "KiCad Bitmap2Component";
-        "applications/org.kicad.eeschema.desktop"               = hidden "KiCad Eeschema";
-        "applications/org.kicad.gerbview.desktop"               = hidden "KiCad Gerbview";
-        "applications/org.kicad.pcbcalculator.desktop"          = hidden "KiCad PCB Calculator";
-        "applications/org.kicad.pcbnew.desktop"                 = hidden "KiCad PCBNew";
+       
     };
 }
