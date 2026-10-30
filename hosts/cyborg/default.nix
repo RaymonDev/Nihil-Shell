@@ -54,9 +54,9 @@
         # to drop it (and Ollama) altogether.
         nilo =
         {
-            enable = false;
+            enable = true;
             acceleration = "vulkan";
-            integratedGpu = true;
+            integratedGpu = false;
         };
     };
     system.stateVersion = "26.05";
